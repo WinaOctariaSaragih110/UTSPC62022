@@ -1,0 +1,619 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>UTS PC6</title>
+</head>
+<body>
+<center>
+	<h1 body style="color:white">UTS PC6</h1> 
+	<h2 body style="color:yellow">WINA OCTARIA SARAGIH (201401110)</h2>
+	<body style="background-image: url(bg.jpg); background-size: cover; background-repeat: repeat; background-attachment: fixed;"></body>	
+	<br>
+			<canvas id='canvas1' style='display:block;margin:10px'></canvas>
+			<canvas id='canvas2' style='display:block;margin:10px'></canvas>
+			
+
+        <div class="column">
+            <h3 body style="color:white">PART 1</h3>
+            <button id='read'>READ IMAGE</button>
+			<button id='awal'>ORIGINAL IMAGE</button><br><br>
+			<select id='histval'>
+				<option value='0'>Red</option>
+				<option value='1'>Green</option>
+				<option value='2'>Blue</option>
+			</select>
+			<button id='hist'>Histogram</button><br><br>
+			<p body style="color:white">
+			R <input type='range' min='-255' max='255' data-id='1' id='cl1'><input type='text' id='clr1' size='3' disabled value='0' body style="color:white"><br>
+			G <input type='range' min='-255' max='255' data-id='2' id='cl2'><input type='text' id='clr2' size='3' disabled value='0' body style="color:white"><br>
+			B <input type='range' min='-255' max='255' data-id='3' id='cl3'><input type='text' id='clr3' size='3' disabled value='0' body style="color:white"><br>
+			Y <input type='range' min='-255' max='255' data-id='5' id='cl5'><input type='text' id='clr5' size='3' disabled value='0' body style="color:white"><br>
+			A <input type='range' min='0' max='255' data-id='4' id='cl4' value='255'><input type='text' id='clr4' size='3' disabled value='255' body style="color:white"></p><br>
+			<button id='default'>Default RGBA</button>
+			<button id='random'>Randomize RGBA</button>
+        </div>
+		
+        <div class="column">
+			<h2 body style="color:white">UTS PC</h2>
+            <button id='Pilihan_B'>RGB MEAN FILTERING</button><br><br><br>
+            <button id='Pilihan_C'>RGBY</button><br><br>
+        </div>
+		
+		<div class="column">
+			<h2 body style="color:white">PART 3</h2>
+			<p body style="color:white">
+			Flip<br>
+			<button id='flip1'>Horizontal</button>
+			<button id='flip2'>Vertikal</button>
+			<button id='flip3'>Keduanya</button>
+			<br>
+			<p body style="color:white">
+			Mirror<br>
+			<button id='mirror1'>Kiri</button>
+			<button id='mirror2'>Kanan</button>
+			<button id='mirror3'>Atas</button>
+			<button id='mirror4'>Bawah</button>
+			<br><br>
+			Mirror Perempat<br>
+			<button id='mir1'>KiAt</button>
+			<button id='mir2'>KaAt</button>
+			<button id='mir3'>KiBa</button>
+			<button id='mir4'>KaBa</button>
+			</p>
+		</div>
+		
+</center>
+</body>
+
+<style>
+* 	{
+ 	 box-sizing: border-box;
+  	}
+.column {
+  float: left;
+  padding: 10px;
+  width: 33.3%;
+  		}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+</style>
+
+
+<script src='pc.js'></script>
+<script>
+
+// PART 1
+
+var canvas = document.getElementById('canvas1')
+var obj = new pc(canvas)
+obj.image2canvas("lambang.jpg")
+var canvas2 = document.getElementById('canvas2')
+var obj2 = new pc(canvas2)
+obj2.blank2canvas(200,200)
+var tes = new Array()
+
+
+document.getElementById('read').addEventListener('click',function(){
+	tes = obj.image2read()
+		})
+
+document.getElementById('awal').addEventListener('click',function(){
+	obj.image2original()
+		})
+
+function rgbachange(){
+
+	tesbackup = new Array()
+
+	for(var c=0; c<tes.length; c++){
+		temp = new Array()
+		for(var d=0; d<4; d++){
+			temp.push(tes[c][d])
+		}
+		tesbackup.push(temp)
+	}
+
+	for(var j=0; j<tesbackup.length; j++){
+		tesbackup[j][0] += parseInt(document.getElementById('cl1').value)
+		tesbackup[j][1] += parseInt(document.getElementById('cl2').value)
+		tesbackup[j][2] += parseInt(document.getElementById('cl3').value)
+		tesbackup[j][3] = parseInt(document.getElementById('cl4').value)
+		tesbackup[j][4] += parseInt(document.getElementById('cl5').value)
+	}
+
+	for(var i=1; i<=4;i++) 
+		document.getElementById('clr'+i).value = document.getElementById('cl'+i).value
+		obj.array2canvas(tesbackup)
+	}
+
+	for(var i=1; i<=4;i++){
+		document.getElementById('cl'+i).addEventListener('input',function(){
+		rgbachange()
+	})
+}
+
+document.getElementById('default').addEventListener('click',function(){
+	obj.image2original()
+	for(var i=1; i<=3;i++){
+		document.getElementById('cl'+i).value = 0
+	}
+
+	document.getElementById('cl4').value = 255
+	rgbachange()
+})
+
+document.getElementById('random').addEventListener('click',function(){
+	
+	for(var i=1; i<=3;i++){
+		document.getElementById('cl'+i).value = Math.floor(Math.random() * 511) - 255;
+	}
+	document.getElementById('cl4').value = Math.floor(Math.random() * 256);
+	rgbachange()
+})
+
+document.getElementById('hist').addEventListener('click',function(){
+	var hist = obj.hist2read([parseInt(document.getElementById("histval").value)]) //Call [R,G,B,A] as [0,1,2,3], can input more than 1 but only [0..3] parameter only
+	obj2.hist2canvas(hist[0],10)
+})
+
+
+// UTS PC
+//<!-- RGB MEAN FILTERING -->
+document.getElementById('Pilihan_B').addEventListener('click',function(){
+		filtersize = 5
+	borderparam = (filtersize - 1)/2
+		meandoubleparam = filtersize*filtersize
+	tesbackup = new Array()
+		for(var c=0;c<tes.length;c++){
+	temp = new Array()
+		for(var d=0;d<4;d++){
+	temp.push(tes[c][d])
+	}
+	tesbackup.push(temp)
+	}
+	var wnow=obj.width
+		for (var i=0;i<tesbackup.length;i++){
+	x=obj.i2x(i)
+	y=obj.i2y(i)
+		if(x<=wnow/4){
+			posnow = obj.xy2i(wnow-x-1,y)
+	tes[i][0]=255
+	tes[i][1]=tesbackup[i][1]
+	tes[i][2]=tesbackup[i][2]
+	}
+
+	else if(x<=wnow/2){
+		posnow = obj.xy2i(wnow-x-1,y)
+	tes[i][0]=tesbackup[i][0]
+	tes[i][1]=255
+	tes[i][2]=tesbackup[i][2]
+	tes[i][3]=tesbackup[i][3]
+	}
+
+	else if(x>=wnow/2){
+		xstart = obj.i2x(i) - borderparam
+		xend = obj.i2x(i) + borderparam
+		ystart = obj.i2y(i) - borderparam
+		yend = obj.i2y(i) + borderparam
+	red = 0
+	green = 0
+	blue = 0
+	disvparam = 0
+		for(var yc=ystart; yc<=yend; yc++){
+		for(var xc=xstart; xc<=xend; xc++){
+	if(yc>=0 && xc>=0 && xc<obj.width && yc<obj.height){
+		red += tesbackup[obj.xy2i(xc,yc)][0]
+		green += tesbackup[obj.xy2i(xc,yc)][1]
+		blue += tesbackup[obj.xy2i(xc,yc)][2]
+		disvparam++;
+		}
+	}
+}
+	tes[i][0] = Math.floor(red/disvparam)
+	tes[i][1] = Math.floor(green/disvparam)
+	tes[i][2] = Math.floor(blue/disvparam)
+	}
+}
+
+obj.array2canvas(tes)
+})
+
+//<!-- RGBY-->
+document.getElementById('Pilihan_C').addEventListener('click',function(){
+	filtersize = 1
+		borderparam = (filtersize - 1)/2
+	meandoubleparam = filtersize*filtersize
+		tesbackup = new Array()
+	for(var c=0;c<tes.length;c++){
+		temp = new Array()
+	for(var d=0;d<4;d++){
+		temp.push(tes[c][d])
+	}
+	tesbackup.push(temp)
+	}
+		var wnow=obj.width
+		var ynow=obj.height
+	for (var i=0;i<tesbackup.length;i++){
+		x=obj.i2x(i)
+		y=obj.i2y(i)
+	if(x<=wnow/2 && y<=ynow/2){
+		posnow = obj.xy2i(wnow-x-1 && ynow-y-1)
+			tes[i][0]=255
+			tes[i][1]=tesbackup[i][1]
+			tes[i][2]=tesbackup[i][2]
+			tes[i][3]=tesbackup[i][3]
+		}
+	else if(x>=wnow/2 && y<=ynow/2){
+		posnow = obj.xy2i(wnow-x-1 && ynow-y-1)
+			tes[i][0]=tesbackup[i][0]
+			tes[i][1]=255
+			tes[i][2]=tesbackup[i][2]
+			tes[i][3]=tesbackup[i][3]
+		}
+	else if(x>=wnow/2 && y>=ynow/2){
+		posnow = obj.xy2i(wnow-x-1 && ynow-y-1)
+			tes[i][0]=tesbackup[i][0]
+			tes[i][1]=tesbackup[i][1]
+			tes[i][2]=255
+			tes[i][3]=tesbackup[i][3]
+		}
+	else if(x<=wnow/1 && y<=ynow/1){
+		posnow = obj.xy2i(wnow-x-1 && ynow-y-1)
+			tes[i][0]=255
+			tes[i][1]=255
+			tes[i][2]=tesbackup[i][2]
+			tes[i][3]=tesbackup[i][3]
+
+		}
+	}
+		obj.array2canvas(tes)
+	}
+)
+
+
+// PART 3
+
+<!-- FLIP HORIZONTAL -->
+document.getElementById('flip1').addEventListener('click',function(){
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i) //mengambil nilai index array ke dalam koordinat x
+y=obj.i2y(i)
+posnow = obj.xy2i(obj.width-1-x,y) //mengubah index array xy kedalam koordinat xy
+
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+obj.array2canvas(tes)
+})
+
+
+<!-- FLIP VERTIKAL -->
+document.getElementById('flip2').addEventListener('click',function(){
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+posnow = obj.xy2i(x,obj.height-1-y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+obj.array2canvas(tes)
+})
+
+
+<!-- FLIP KEDUANYA -->
+document.getElementById('flip3').addEventListener('click',function(){
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+posnow = obj.xy2i(obj.width-1-x,obj.height-1-y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+obj.array2canvas(tes)
+})
+
+
+//<!-- EFEK MIRRORING -->
+document.getElementById('mirror1').addEventListener('click',function(){
+
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+var wnow=obj.width
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(x>=wnow/2){
+posnow = obj.xy2i(wnow-x-1,y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+document.getElementById('mirror2').addEventListener('click',function(){
+
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+var wnow=obj.width
+
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(x<wnow/2){
+posnow = obj.xy2i(wnow-x-1,y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+document.getElementById('mirror3').addEventListener('click',function(){
+
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+var hnow=obj.height
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(y>=hnow/2){
+posnow = obj.xy2i(x,hnow-y-1)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+document.getElementById('mirror4').addEventListener('click',function(){
+
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+var hnow=obj.height
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(y<hnow/2){
+posnow = obj.xy2i(x,hnow-y-1)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+
+
+
+
+
+//<!-- EFEK MIRROR PEREMPAAT -->
+document.getElementById('mir1').addEventListener('click',function(){
+
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+var wnow=obj.width
+var hnow=obj.height
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(x>=wnow/2){
+posnow = obj.xy2i(wnow-x-1,y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(y>hnow/2){
+posnow = obj.xy2i(x,hnow-y-1)
+tes[i][0]=tes[posnow][0]
+tes[i][1]=tes[posnow][1]
+tes[i][2]=tes[posnow][2]
+tes[i][3]=tes[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+document.getElementById('mir2').addEventListener('click',function(){
+	tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//copy array to array without reference
+var wnow=obj.width
+var hnow=obj.height
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(x<wnow/2){
+posnow = obj.xy2i(wnow-x-1,y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(y>hnow/2){
+posnow = obj.xy2i(x,hnow-y-1)
+tes[i][0]=tes[posnow][0]
+tes[i][1]=tes[posnow][1]
+tes[i][2]=tes[posnow][2]
+tes[i][3]=tes[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+
+document.getElementById('mir3').addEventListener('click',function(){
+
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+var wnow=obj.width
+var hnow=obj.height
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(x>=wnow/2){
+posnow = obj.xy2i(wnow-x-1,y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(y<hnow/2){
+posnow = obj.xy2i(x,hnow-y-1)
+tes[i][0]=tes[posnow][0]
+tes[i][1]=tes[posnow][1]
+tes[i][2]=tes[posnow][2]
+tes[i][3]=tes[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+document.getElementById('mir4').addEventListener('click',function(){
+
+//copy array to array without reference
+tesbackup = new Array()
+for(var c=0;c<tes.length;c++){
+temp = new Array()
+for(var d=0;d<4;d++){
+temp.push(tes[c][d])
+}
+tesbackup.push(temp)
+}
+//end of copy
+var wnow=obj.width
+var hnow=obj.height
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(x<wnow/2){
+posnow = obj.xy2i(wnow-x-1,y)
+tes[i][0]=tesbackup[posnow][0]
+tes[i][1]=tesbackup[posnow][1]
+tes[i][2]=tesbackup[posnow][2]
+tes[i][3]=tesbackup[posnow][3]
+}
+}
+for (var i=0;i<tesbackup.length;i++){
+x=obj.i2x(i)
+y=obj.i2y(i)
+if(y<hnow/2){
+posnow = obj.xy2i(x,hnow-y-1)
+tes[i][0]=tes[posnow][0]
+tes[i][1]=tes[posnow][1]
+tes[i][2]=tes[posnow][2]
+tes[i][3]=tes[posnow][3]
+}
+}
+obj.array2canvas(tes)
+})
+</script>
